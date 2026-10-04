@@ -13,13 +13,9 @@ export default {
     'start.list.empty': 'Список ще не завантажено.',
     'start.list.saved': 'Збережено: {words}',
     'start.list.file': '{name} · завантажено {date}',
-    'start.source':
-        'Файл можна взяти з пристрою або з Google Диска: на iPhone — у «Файлах», розділ Google Drive; на ПК — з диска Google Drive.',
     'start.load': 'Завантажити .xlsx',
     'start.replace': 'Завантажити інший файл',
     'start.loading': 'Читаю файл…',
-    'start.format':
-        'Береться перший аркуш. Рядок 1 — заголовок, і назва стовпця C показується як назва мови перекладу. Стовпець B — слово японською (кана), стовпець C — переклад будь-якою мовою.',
     'start.direction': 'Напрям',
     'start.direction.option': '{from} → {to}',
     'start.mode': 'Режим',

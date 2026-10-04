@@ -92,8 +92,6 @@ export function showStart(root, { state, onFile, onChange, onStart }) {
             : h('p', { class: 'list-status', text: t('start.list.empty') }),
         message,
         h('div', { class: 'actions' }, loadButton),
-        h('p', { class: 'hint', text: t('start.source') }),
-        h('p', { class: 'hint', text: t('start.format') }),
         fileInput,
     );
 
