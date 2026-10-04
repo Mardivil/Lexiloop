@@ -50,6 +50,21 @@ async function fromCache(request) {
     return undefined;
 }
 
+/**
+ * Copies a response with `Cache-Control: no-cache`. GitHub Pages sends `max-age=600`, and Chrome
+ * reuses such a response from its memory cache on a reload without asking this worker, so one
+ * module of the previous release could load beside the others of the new one. The copy is also
+ * not marked as redirected, which a navigation request would reject.
+ */
+function withNoCache(response) {
+    if (!response || response.type !== 'basic') {
+        return response;
+    }
+    const headers = new Headers(response.headers);
+    headers.set('Cache-Control', 'no-cache');
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 async function networkFirst(request) {
     // 'no-cache' revalidates with the server instead of trusting the HTTP cache. GitHub Pages
     // allows caching for 10 minutes, and modules taken from two different releases can break
@@ -90,5 +105,5 @@ self.addEventListener('fetch', (event) => {
     if (!APP_FILES.has(request.url.split(/[?#]/)[0]) && request.mode !== 'navigate') {
         return;
     }
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(request).then(withNoCache));
 });
