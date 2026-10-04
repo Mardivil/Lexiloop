@@ -3,17 +3,15 @@ import { DEFAULT_IMPORT_PROFILE } from '../data/import-profiles.js';
 import { t } from '../i18n/index.js';
 
 /**
- * Name of one side of a word list: the studied language, or the translations. The translations
- * are named by the sheet's column header when it has one, because their language is whatever the
- * user wrote.
+ * Name of one side of a word list: the studied language, or the translations. Translations are
+ * always called by the generic name, whatever language the sheet holds.
  *
  * @param {import('../data/deck.js').Deck | null} deck
  * @param {'source' | 'target'} side
  */
 export function sideLabel(deck, side) {
     const code = deck?.[`${side}Lang`] ?? DEFAULT_IMPORT_PROFILE[`${side}Lang`];
-    const label = side === 'target' ? deck?.targetLabel : '';
-    return label || t(`lang.${code}`);
+    return t(`lang.${code}`);
 }
 
 /**

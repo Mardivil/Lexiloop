@@ -1,4 +1,3 @@
-import { collapseSpaces } from '../core/text.js';
 import { entryId } from './deck.js';
 import { DEFAULT_IMPORT_PROFILE } from './import-profiles.js';
 
@@ -57,18 +56,6 @@ export function loadXlsxLibrary() {
     return libraryPromise;
 }
 
-/** Longest column header that is shown as the name of the translation language. */
-const MAX_LABEL_LENGTH = 40;
-
-/**
- * The header text of a column, used to name the translation language ("English", "Ukrainian").
- * @returns {string} '' when the cell is empty or its text is too long to be a name.
- */
-function columnLabel(cell) {
-    const text = collapseSpaces(String(cell?.w ?? cell?.v ?? ''));
-    return text.length <= MAX_LABEL_LENGTH ? text : '';
-}
-
 /** Every .xlsx file is a zip archive, which starts with the local file header "PK\x03\x04". */
 function isZip(bytes) {
     return (
@@ -109,9 +96,6 @@ export function parseWorkbook(buffer, fileName, XLSX, profile = DEFAULT_IMPORT_P
     if (!sheet) {
         throw new ImportError(ImportErrorCode.NoSheet);
     }
-
-    const headerCell =
-        profile.headerRows > 0 ? sheet[`${profile.columns.translation}${profile.headerRows}`] : null;
 
     // header: 'A' keys each row by column letter. A numeric range starts reading at that row
     // index, which skips the header rows. raw: false yields the text as Excel displays it.
@@ -163,7 +147,6 @@ export function parseWorkbook(buffer, fileName, XLSX, profile = DEFAULT_IMPORT_P
             profileId: profile.id,
             sourceLang: profile.sourceLang,
             targetLang: profile.targetLang,
-            targetLabel: columnLabel(headerCell),
             fileName,
             importedAt: new Date().toISOString(),
             entries,

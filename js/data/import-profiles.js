@@ -6,8 +6,7 @@ import { UNDETERMINED } from './languages.js';
  * @property {string} sourceLang  Language of the studied words.
  * @property {string} targetLang  Language of their translations, `UNDETERMINED` when any.
  * @property {{ term: string, translation: string }} columns  Spreadsheet column letters.
- * @property {number} headerRows  Rows at the top of the sheet that are skipped. The last of them
- *   names the columns: its text in the translation column becomes the deck's translation label.
+ * @property {number} headerRows  Rows at the top of the sheet that are skipped.
  */
 
 /** @type {Record<string, ImportProfile>} */
