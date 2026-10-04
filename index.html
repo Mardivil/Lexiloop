@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Lexiloop</title>
+    <meta name="description" content="Вивчення слів: японська ⇄ українська. Картки, вибір варіанта, пари.">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#f6f4ef" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#16171c" media="(prefers-color-scheme: dark)">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lexiloop">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="css/app.css">
+    <script type="module" src="js/main.js"></script>
+</head>
+<body>
+    <div id="app">
+        <noscript><p class="page">Для роботи Lexiloop потрібен JavaScript.</p></noscript>
+    </div>
+    <script>
+        // Browsers refuse ES modules from file:// URLs, which would leave the page blank.
+        if (location.protocol === 'file:') {
+            document.getElementById('app').innerHTML =
+                '<p class="page">Lexiloop потрібно відкривати через вебадресу, а не як файл з диска.</p>';
+        }
+    </script>
+</body>
+</html>
