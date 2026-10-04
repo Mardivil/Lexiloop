@@ -18,6 +18,7 @@ self.PRECACHE_URLS = [
     'js/core/stats.js',
     'js/core/text.js',
     'js/data/deck.js',
+    'js/data/google-sheets.js',
     'js/data/import-profiles.js',
     'js/data/importer.js',
     'js/data/languages.js',

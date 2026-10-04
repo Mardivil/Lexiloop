@@ -1,5 +1,6 @@
 import { cardsFor, Direction } from './data/deck.js';
-import { ImportError, loadXlsxLibrary, parseWorkbook } from './data/importer.js';
+import { downloadGoogleSheet } from './data/google-sheets.js';
+import { ImportError, ImportErrorCode, loadXlsxLibrary, parseWorkbook } from './data/importer.js';
 import { loadActiveDeck, onStoredDeckChange, saveActiveDeck, SaveResult } from './data/storage.js';
 import { t } from './i18n/index.js';
 import { createSpeech } from './platform/speech.js';
@@ -22,6 +23,7 @@ const state = {
     modeId: 'flashcards',
     busy: false,
     message: null,
+    linkOpen: false,
 };
 
 let screen = 'start';
@@ -33,6 +35,8 @@ function renderStart() {
     showStart(root, {
         state,
         onFile: importFile,
+        onLink: importLink,
+        onRefresh: () => state.deck?.sourceUrl && importLink(state.deck.sourceUrl),
         // The controls already show the new value, so the screen is not rebuilt.
         onChange: (patch) => Object.assign(state, patch),
         onStart: () => startSession(),
@@ -51,13 +55,41 @@ function importReport(report) {
 }
 
 /** @param {File} file */
-async function importFile(file) {
+function importFile(file) {
+    return importWorkbook(() => file.arrayBuffer(), file.name, null);
+}
+
+/** @param {string} link Link of a Google Sheets spreadsheet shared by link. */
+function importLink(link) {
+    return importWorkbook(() => downloadGoogleSheet(link), t('lang.sheet'), link.trim());
+}
+
+/**
+ * Reads a workbook, stores it as the word list and reports the result on the start screen.
+ * @param {() => Promise<ArrayBuffer>} read
+ * @param {string} fileName
+ * @param {string | null} sourceUrl  The spreadsheet link, for a list that can be refreshed.
+ */
+async function importWorkbook(read, fileName, sourceUrl) {
     state.busy = true;
     state.message = null;
     renderStart();
     try {
-        const [XLSX, buffer] = await Promise.all([loadXlsxLibrary(), file.arrayBuffer()]);
-        const { deck, report } = parseWorkbook(buffer, file.name, XLSX);
+        const [XLSX, buffer] = await Promise.all([loadXlsxLibrary(), read()]);
+        let result;
+        try {
+            result = parseWorkbook(buffer, fileName, XLSX);
+        } catch (error) {
+            // Google answers a link it will not share with a web page, not with a workbook.
+            const notAWorkbook = error instanceof ImportError && error.code === ImportErrorCode.NotXlsx;
+            throw sourceUrl && notAWorkbook ? new ImportError(ImportErrorCode.NoAccess, error) : error;
+        }
+        const { deck, report } = result;
+        if (sourceUrl) {
+            deck.sourceUrl = sourceUrl;
+        }
+        state.linkOpen = false;
+        state.linkDraft = undefined;
         const lines = importReport(report);
         let kind = 'ok';
         const saved = saveActiveDeck(deck);

@@ -12,6 +12,11 @@ export const ImportErrorCode = Object.freeze({
     NoSheet: 'no-sheet',
     NoRows: 'no-rows',
     LibraryMissing: 'library-missing',
+    /** The text given as a link does not name a Google Sheets spreadsheet. */
+    BadLink: 'bad-link',
+    /** The spreadsheet is not shared by link, or does not exist. */
+    NoAccess: 'no-access',
+    Network: 'network',
 });
 
 export class ImportError extends Error {

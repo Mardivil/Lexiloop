@@ -127,6 +127,11 @@ button:disabled {
     outline-offset: 2px;
 }
 
+/* An element's own display rule would otherwise override the hidden attribute. */
+[hidden] {
+    display: none !important;
+}
+
 .visually-hidden {
     position: absolute !important;
     width: 1px;
@@ -310,6 +315,11 @@ button:disabled {
     gap: 2px;
 }
 
+.message-info {
+    background: var(--surface-2);
+    color: var(--muted);
+}
+
 .message-ok {
     background: var(--good-soft);
     color: var(--good);
@@ -323,6 +333,43 @@ button:disabled {
 .message-error {
     background: var(--bad-soft);
     color: var(--bad);
+}
+
+.actions.wrap {
+    flex-wrap: wrap;
+}
+
+.card .actions > .btn {
+    flex: 1 1 auto;
+}
+
+.link-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+/* 16 px at least: Safari on iOS zooms the page into any smaller text field it focuses. */
+.text-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
+    font-size: 16px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.text-input:focus {
+    border-color: var(--accent);
+    outline: none;
 }
 
 .segmented {

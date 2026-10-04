@@ -23,6 +23,8 @@ function formatDate(iso) {
  * @property {string} modeId
  * @property {boolean} busy        A file is being read.
  * @property {{ kind: 'ok' | 'error' | 'warning', lines: string[] } | null} message
+ * @property {boolean} linkOpen    The form for a Google Sheets link is shown.
+ * @property {string} [linkDraft]  Text typed into that form and not loaded yet.
  */
 
 /**
@@ -32,10 +34,12 @@ function formatDate(iso) {
  * @param {object} options
  * @param {StartState} options.state
  * @param {(file: File) => void} options.onFile
+ * @param {(link: string) => void} options.onLink     Loads a Google Sheets spreadsheet by its link.
+ * @param {() => void} options.onRefresh              Loads the stored spreadsheet link again.
  * @param {(patch: Partial<StartState>) => void} options.onChange
  * @param {() => void} options.onStart
  */
-export function showStart(root, { state, onFile, onChange, onStart }) {
+export function showStart(root, { state, onFile, onLink, onRefresh, onChange, onStart }) {
     const { deck } = state;
 
     const fileInput = h('input', {
@@ -60,20 +64,98 @@ export function showStart(root, { state, onFile, onChange, onStart }) {
         class: deck ? 'btn' : 'btn btn-primary',
         type: 'button',
         disabled: state.busy,
-        text: state.busy ? t('start.loading') : t(deck ? 'start.replace' : 'start.load'),
+        text: t(deck ? 'start.replace' : 'start.load'),
         on: { click: () => fileInput.click() },
     });
 
-    const message =
-        state.message &&
+    const linkInput = h('input', {
+        type: 'url',
+        class: 'text-input',
+        id: 'sheet-link',
+        // A link that failed to load stays in the field after the screen is rebuilt.
+        value: state.linkDraft ?? deck?.sourceUrl ?? '',
+        placeholder: t('start.link.placeholder'),
+        disabled: state.busy,
+        attrs: {
+            inputmode: 'url',
+            autocomplete: 'off',
+            autocapitalize: 'off',
+            spellcheck: 'false',
+            enterkeyhint: 'go',
+        },
+        on: { input: () => onChange({ linkDraft: linkInput.value }) },
+    });
+    const linkForm = h(
+        'form',
+        {
+            class: 'link-form',
+            hidden: !state.linkOpen,
+            on: {
+                submit: (event) => {
+                    event.preventDefault();
+                    if (!state.busy && linkInput.value.trim()) {
+                        onLink(linkInput.value);
+                    }
+                },
+                keydown: (event) => {
+                    if (event.key === 'Escape') {
+                        toggleLink(false);
+                    }
+                },
+            },
+        },
+        h('label', { class: 'field-label', htmlFor: 'sheet-link', text: t('start.link.label') }),
+        linkInput,
         h(
             'div',
-            {
-                class: `message message-${state.message.kind}`,
-                attrs: { role: state.message.kind === 'error' ? 'alert' : 'status' },
-            },
-            state.message.lines.map((line) => h('p', { text: line })),
-        );
+            { class: 'actions' },
+            h('button', { class: 'btn btn-primary', type: 'submit', disabled: state.busy, text: t('start.link.load') }),
+            h('button', {
+                class: 'btn btn-quiet',
+                type: 'button',
+                text: t('start.link.cancel'),
+                on: { click: () => toggleLink(false) },
+            }),
+        ),
+    );
+
+    function toggleLink(open) {
+        linkForm.hidden = !open;
+        onChange({ linkOpen: open });
+        if (open) {
+            linkInput.focus();
+        }
+    }
+
+    const linkButton = h('button', {
+        class: 'btn',
+        type: 'button',
+        disabled: state.busy,
+        text: t('start.link'),
+        on: { click: () => toggleLink(linkForm.hidden) },
+    });
+
+    const refreshButton =
+        deck?.sourceUrl &&
+        h('button', {
+            class: 'btn btn-primary',
+            type: 'button',
+            disabled: state.busy,
+            text: t('start.refresh'),
+            on: { click: onRefresh },
+        });
+
+    const message = state.busy
+        ? h('div', { class: 'message message-info', attrs: { role: 'status' } }, h('p', { text: t('start.loading') }))
+        : state.message &&
+          h(
+              'div',
+              {
+                  class: `message message-${state.message.kind}`,
+                  attrs: { role: state.message.kind === 'error' ? 'alert' : 'status' },
+              },
+              state.message.lines.map((line) => h('p', { text: line })),
+          );
 
     const listCard = h(
         'section',
@@ -86,12 +168,16 @@ export function showStart(root, { state, onFile, onChange, onStart }) {
                   h('strong', { text: t('start.list.saved', { words: t('words', { count: deck.entries.length }) }) }),
                   h('span', {
                       class: 'file-name',
-                      text: t('start.list.file', { name: deck.fileName, date: formatDate(deck.importedAt) }),
+                      text: deck.sourceUrl
+                          ? t('start.list.sheet', { date: formatDate(deck.importedAt) })
+                          : t('start.list.file', { name: deck.fileName, date: formatDate(deck.importedAt) }),
                   }),
               )
             : h('p', { class: 'list-status', text: t('start.list.empty') }),
         message,
-        h('div', { class: 'actions' }, loadButton),
+        refreshButton && h('div', { class: 'actions' }, refreshButton),
+        h('div', { class: 'actions wrap' }, loadButton, linkButton),
+        linkForm,
         fileInput,
     );
 

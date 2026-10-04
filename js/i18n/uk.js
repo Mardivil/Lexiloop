@@ -6,6 +6,7 @@ export default {
     'lang.ja': 'Японська',
     'lang.uk': 'Українська',
     'lang.und': 'Переклад',
+    'lang.sheet': 'Google Таблиця',
 
     'words': { one: '{count} слово', few: '{count} слова', many: '{count} слів', other: '{count} слова' },
 
@@ -13,9 +14,16 @@ export default {
     'start.list.empty': 'Список ще не завантажено.',
     'start.list.saved': 'Збережено: {words}',
     'start.list.file': '{name} · завантажено {date}',
+    'start.list.sheet': 'Google Таблиця · завантажено {date}',
+    'start.link': 'За посиланням',
+    'start.link.label': 'Посилання на Google Таблицю',
+    'start.link.placeholder': 'https://docs.google.com/spreadsheets/d/…',
+    'start.link.load': 'Завантажити',
+    'start.link.cancel': 'Скасувати',
+    'start.refresh': 'Оновити з таблиці',
     'start.load': 'Завантажити .xlsx',
     'start.replace': 'Завантажити інший файл',
-    'start.loading': 'Читаю файл…',
+    'start.loading': 'Завантажую список…',
     'start.direction': 'Напрям',
     'start.direction.option': '{from} → {to}',
     'start.mode': 'Режим',
@@ -42,6 +50,10 @@ export default {
     'import.error.library-missing':
         'Не вдалося завантажити модуль читання таблиць. Перевірте з’єднання й спробуйте ще раз.',
     'import.error.read': 'Не вдалося відкрити файл.',
+    'import.error.bad-link': 'Це не посилання на Google Таблицю.',
+    'import.error.no-access':
+        'Не вдалося завантажити таблицю. Перевірте доступ: «Поділитися» → «Усі, хто має посилання».',
+    'import.error.network': 'Немає з’єднання з Google. Перевірте інтернет і спробуйте ще раз.',
     'import.kept': 'Попередній список слів залишився без змін.',
     'storage.unavailable':
         'Браузер не дозволяє зберігати дані, тож після закриття сторінки список доведеться завантажити знову.',

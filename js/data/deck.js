@@ -16,6 +16,7 @@ import { language } from './languages.js';
  * @property {string} targetLang
  * @property {string} [targetLabel]  Name of the translation language from the sheet's header, or ''.
  * @property {string} fileName
+ * @property {string} [sourceUrl]  Link of the Google Sheets spreadsheet the deck was read from.
  * @property {string} importedAt   ISO 8601 timestamp.
  * @property {Entry[]} entries
  */
