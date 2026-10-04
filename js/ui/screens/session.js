@@ -34,7 +34,8 @@ import { modeById } from '../modes/registry.js';
  */
 export function showSession(root, { cards, pool, modeId, speech, onFinish }) {
     const mode = modeById(modeId);
-    const session = createSession({ cards });
+    const studied = new Set(cards.map((card) => card.entryId));
+    const session = createSession({ cards, fillers: pool.filter((card) => !studied.has(card.entryId)) });
     let finished = false;
 
     const score = h('span', { class: 'score', attrs: { 'aria-live': 'off' } });

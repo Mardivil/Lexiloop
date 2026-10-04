@@ -6,6 +6,12 @@ export const RETRY_GAP_MIN = 3;
 export const RETRY_GAP_MAX = 6;
 
 /**
+ * A pass shorter than this is padded with filler cards. Studying one or two words alone makes no
+ * sense: the same card would come again and again, and a matching round would hold a single pair.
+ */
+export const MIN_PASS_SIZE = 6;
+
+/**
  * @typedef {object} Card
  * @property {string} entryId    Stable id of the word list entry.
  * @property {string} prompt     Text shown as the question.
@@ -24,14 +30,23 @@ export const RETRY_GAP_MAX = 6;
  * back a few cards later, and keeps coming back until it is answered right. A card that comes
  * back this way is not shown again later in the same pass.
  *
- * @param {{ cards: Card[], rng?: () => number }} options
+ * When there are fewer cards than `MIN_PASS_SIZE`, as when only the mistakes of a session are
+ * studied again, every pass is padded with a fresh random choice of `fillers`. The studied cards
+ * stay in every pass; fillers are answered and counted like any other card.
+ *
+ * @param {{ cards: Card[], fillers?: Card[], rng?: () => number }} options
+ *   `fillers` must not repeat any of `cards`.
  */
-export function createSession({ cards, rng = Math.random }) {
+export function createSession({ cards, fillers = [], rng = Math.random }) {
     if (cards.length === 0) {
         throw new Error('A session needs at least one card.');
     }
 
     const stats = createStats();
+    /** @type {Map<string, Card>} */
+    const cardsById = new Map([...cards, ...fillers].map((card) => [card.entryId, card]));
+    const fillerCount = Math.min(fillers.length, Math.max(0, MIN_PASS_SIZE - cards.length));
+    const passSize = cards.length + fillerCount;
     /** Remaining cards of the current pass, next card first. */
     let pass = [];
     /** Number of cards served so far, the clock that retry gaps are measured on. */
@@ -41,7 +56,7 @@ export function createSession({ cards, rng = Math.random }) {
     const retries = new Map();
 
     function startPass() {
-        pass = shuffled(cards, rng);
+        pass = shuffled([...cards, ...shuffled(fillers, rng).slice(0, fillerCount)], rng);
         // The first card of a new pass must not repeat the card just shown.
         if (pass.length > 1 && pass[0].entryId === lastServedId) {
             const j = randomInt(1, pass.length - 1, rng);
@@ -50,7 +65,7 @@ export function createSession({ cards, rng = Math.random }) {
     }
 
     function cardById(entryId) {
-        return cards.find((card) => card.entryId === entryId);
+        return cardsById.get(entryId);
     }
 
     /** Due retries, earliest first. */
@@ -87,11 +102,9 @@ export function createSession({ cards, rng = Math.random }) {
     }
 
     return {
-        cards,
-
         /** @returns {Card} The next card to ask. */
         next() {
-            const dueId = dueRetries().find((id) => id !== lastServedId || cards.length === 1);
+            const dueId = dueRetries().find((id) => id !== lastServedId || passSize === 1);
             if (dueId !== undefined) {
                 return serve(cardById(dueId));
             }
@@ -132,7 +145,7 @@ export function createSession({ cards, rng = Math.random }) {
 
             const deferred = [];
             // Bounded so that a deck with fewer distinct pairs than `size` cannot loop forever.
-            for (let attempts = 0; batch.length < size && attempts < cards.length * 2; attempts++) {
+            for (let attempts = 0; batch.length < size && attempts < passSize * 2; attempts++) {
                 const card = takeFromPass(() => true);
                 if (fits(card)) {
                     add(card);
