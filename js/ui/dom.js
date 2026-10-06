@@ -1,4 +1,5 @@
-import { htmlLang } from '../data/languages.js';
+import { htmlLang, language } from '../data/languages.js';
+import { t } from '../i18n/index.js';
 
 /**
  * Creates an element.
@@ -67,21 +68,16 @@ export function lengthClass(text) {
     return text.length > 12 ? 'is-long' : '';
 }
 
-/** Removes every child of `element`. */
-export function clear(element) {
-    element.replaceChildren();
-}
-
 /** Speaker button that reads `text` aloud, or null when that language cannot be spoken. */
 export function speakButton(ctx, text, lang) {
-    const speechLang = ctx.speechLangOf(lang);
+    const { speechLang } = language(lang);
     if (!ctx.speech.canSpeak(speechLang)) {
         return null;
     }
     const button = h('button', {
         class: 'speak',
         type: 'button',
-        attrs: { 'aria-label': ctx.t('speak'), title: ctx.t('speak') },
+        attrs: { 'aria-label': t('speak'), title: t('speak') },
         on: {
             click: (event) => {
                 event.stopPropagation();

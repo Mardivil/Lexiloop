@@ -52,7 +52,3 @@ document.addEventListener('keydown', (event) => {
 export function bindKeys(map) {
     bindings = { ...map };
 }
-
-export function clearKeys() {
-    bindings = {};
-}

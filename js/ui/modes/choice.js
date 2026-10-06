@@ -1,6 +1,7 @@
 import { buildOptions } from '../../core/choices.js';
+import { t } from '../../i18n/index.js';
 import { bindKeys } from '../../platform/keys.js';
-import { clear, h, lengthClass, speakButton } from '../dom.js';
+import { h, lengthClass, speakButton } from '../dom.js';
 
 /** Delay before the next question after a right answer, long enough to see the confirmation. */
 const CORRECT_ADVANCE_MS = 600;
@@ -21,7 +22,6 @@ export default {
      * @param {import('../screens/session.js').ModeContext} ctx
      */
     mount(root, ctx) {
-        const { t } = ctx;
         let card = null;
         let options = [];
         let answered = false;
@@ -38,7 +38,7 @@ export default {
         function next() {
             window.clearTimeout(advanceTimer);
             card = ctx.session.next();
-            options = buildOptions(card, ctx.pool, { rng: ctx.rng });
+            options = buildOptions(card, ctx.pool);
             answered = false;
             waitingForNext = false;
             render();
@@ -88,7 +88,7 @@ export default {
         }
 
         function render() {
-            clear(view);
+            view.replaceChildren();
             optionButtons = options.map((option, i) =>
                 h(
                     'button',

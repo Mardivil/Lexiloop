@@ -58,13 +58,7 @@ export function loadXlsxLibrary() {
 
 /** Every .xlsx file is a zip archive, which starts with the local file header "PK\x03\x04". */
 function isZip(bytes) {
-    return (
-        bytes.length >= 4 &&
-        bytes[0] === 0x50 &&
-        bytes[1] === 0x4b &&
-        bytes[2] === 0x03 &&
-        bytes[3] === 0x04
-    );
+    return String.fromCharCode(...bytes.subarray(0, 4)) === 'PK\x03\x04';
 }
 
 /**

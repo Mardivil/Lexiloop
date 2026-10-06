@@ -1,24 +1,10 @@
-import uk from './uk.js';
+import dictionary from './uk.js';
 
-/** Interface strings per UI language. Only Ukrainian exists for now. */
-const DICTIONARIES = { uk };
-
-let locale = 'uk';
-let dictionary = DICTIONARIES[locale];
-let pluralRules = new Intl.PluralRules(locale);
-
-/** @param {string} code */
-export function setLocale(code) {
-    if (!DICTIONARIES[code]) {
-        throw new Error(`No interface strings for: ${code}`);
-    }
-    locale = code;
-    dictionary = DICTIONARIES[code];
-    pluralRules = new Intl.PluralRules(code);
-}
+const LOCALE = 'uk';
+const pluralRules = new Intl.PluralRules(LOCALE);
 
 export function currentLocale() {
-    return locale;
+    return LOCALE;
 }
 
 /**

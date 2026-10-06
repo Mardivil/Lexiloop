@@ -64,10 +64,6 @@ export function createSession({ cards, fillers = [], rng = Math.random }) {
         }
     }
 
-    function cardById(entryId) {
-        return cardsById.get(entryId);
-    }
-
     /** Due retries, earliest first. */
     function dueRetries() {
         return [...retries.entries()]
@@ -106,7 +102,7 @@ export function createSession({ cards, fillers = [], rng = Math.random }) {
         next() {
             const dueId = dueRetries().find((id) => id !== lastServedId || passSize === 1);
             if (dueId !== undefined) {
-                return serve(cardById(dueId));
+                return serve(cardsById.get(dueId));
             }
             const card =
                 takeFromPass((c) => c.entryId !== lastServedId) ?? takeFromPass(() => true);
@@ -137,7 +133,7 @@ export function createSession({ cards, fillers = [], rng = Math.random }) {
                 if (batch.length >= size) {
                     break;
                 }
-                const card = cardById(entryId);
+                const card = cardsById.get(entryId);
                 if (fits(card)) {
                     add(card);
                 }

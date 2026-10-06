@@ -1,5 +1,6 @@
+import { t } from '../../i18n/index.js';
 import { bindKeys } from '../../platform/keys.js';
-import { clear, h, lengthClass, speakButton } from '../dom.js';
+import { h, lengthClass, speakButton } from '../dom.js';
 
 /** Flashcards: the prompt side first, a tap reveals the answer, then the learner grades themself. */
 export default {
@@ -12,7 +13,6 @@ export default {
      * @param {import('../screens/session.js').ModeContext} ctx
      */
     mount(root, ctx) {
-        const { t } = ctx;
         let card = null;
         let flipped = false;
         let cardButton = null;
@@ -72,7 +72,7 @@ export default {
         }
 
         function render() {
-            clear(view);
+            view.replaceChildren();
             cardButton = h(
                 'button',
                 {

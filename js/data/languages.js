@@ -24,12 +24,6 @@ export const LANGUAGES = {
         // NFKC folds half-width katakana and full-width Latin into their usual forms.
         normalize: (text) => collapseSpaces(text.normalize('NFKC')),
     },
-    uk: {
-        code: 'uk',
-        htmlLang: 'uk',
-        speechLang: '',
-        normalize: (text) => unifyApostrophes(collapseSpaces(text.normalize('NFKC')).toLocaleLowerCase('uk')),
-    },
     [UNDETERMINED]: {
         code: UNDETERMINED,
         htmlLang: '',

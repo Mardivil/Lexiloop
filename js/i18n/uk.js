@@ -4,7 +4,6 @@ export default {
     'app.tagline': 'Вивчення японських слів',
 
     'lang.ja': 'Японська',
-    'lang.uk': 'Українська',
     'lang.und': 'Переклад',
     'lang.sheet': 'Google Таблиця',
 

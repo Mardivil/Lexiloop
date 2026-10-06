@@ -14,11 +14,6 @@ export function googleSheetId(text) {
     return match ? match[1] : null;
 }
 
-/** Address of the whole spreadsheet as an .xlsx file. Google answers it with CORS headers. */
-export function googleSheetExportUrl(id) {
-    return `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`;
-}
-
 /**
  * Downloads a spreadsheet shared as "Anyone with the link can view", as .xlsx bytes.
  *
@@ -42,7 +37,8 @@ export async function downloadGoogleSheet(link, env = {}) {
 
     let response;
     try {
-        response = await fetchImpl(googleSheetExportUrl(id), { cache: 'no-store', credentials: 'omit' });
+        // The whole spreadsheet as an .xlsx file. Google answers it with CORS headers.
+        response = await fetchImpl(`https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`, { cache: 'no-store', credentials: 'omit' });
     } catch (error) {
         throw new ImportError(isOnline() ? ImportErrorCode.NoAccess : ImportErrorCode.Network, error);
     }

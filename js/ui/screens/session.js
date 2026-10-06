@@ -1,7 +1,6 @@
 import { createSession } from '../../core/session.js';
-import { language } from '../../data/languages.js';
 import { t } from '../../i18n/index.js';
-import { clearKeys } from '../../platform/keys.js';
+import { bindKeys } from '../../platform/keys.js';
 import { h } from '../dom.js';
 import { modeById } from '../modes/registry.js';
 
@@ -12,10 +11,7 @@ import { modeById } from '../modes/registry.js';
  * @property {import('../../core/session.js').Card[]} pool
  *   Every card of the word list, also when the session studies only some of them: wrong
  *   options for multiple choice come from here.
- * @property {typeof t} t
  * @property {ReturnType<typeof import('../../platform/speech.js').createSpeech>} speech
- * @property {() => number} rng
- * @property {(lang: string) => string} speechLangOf  Speech tag of a language code, '' if never spoken.
  * @property {(card: object, isCorrect: boolean) => void} answer  Records an answer.
  * @property {() => void} finish  Ends the session and opens the statistics.
  */
@@ -68,7 +64,7 @@ export function showSession(root, { cards, pool, modeId, speech, onFinish }) {
             return false;
         }
         finished = true;
-        clearKeys();
+        bindKeys({});
         speech.cancel();
         mounted.unmount();
         return true;
@@ -80,16 +76,11 @@ export function showSession(root, { cards, pool, modeId, speech, onFinish }) {
         }
     }
 
-    const speechLangOf = (code) => language(code).speechLang;
-
     /** @type {ModeContext} */
     const ctx = {
         session,
         pool,
-        t,
         speech,
-        rng: Math.random,
-        speechLangOf,
         answer(card, isCorrect) {
             session.record(card, isCorrect);
             updateScore();

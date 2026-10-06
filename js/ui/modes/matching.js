@@ -1,6 +1,7 @@
-import { buildRound, isMatch, PAIRS_PER_ROUND } from '../../core/matching.js';
+import { buildRound, PAIRS_PER_ROUND } from '../../core/matching.js';
+import { t } from '../../i18n/index.js';
 import { bindKeys } from '../../platform/keys.js';
-import { clear, h } from '../dom.js';
+import { h } from '../dom.js';
 
 /** How long a wrong pair stays marked. */
 const WRONG_FLASH_MS = 600;
@@ -18,7 +19,6 @@ export default {
      * @param {import('../screens/session.js').ModeContext} ctx
      */
     mount(root, ctx) {
-        const { t } = ctx;
         /** @type {Map<string, import('../../core/session.js').Card>} */
         let cardsById = new Map();
         let round = { left: [], right: [] };
@@ -44,7 +44,7 @@ export default {
         function nextRound() {
             const cards = ctx.session.nextBatch(PAIRS_PER_ROUND);
             cardsById = new Map(cards.map((card) => [card.entryId, card]));
-            round = buildRound(cards, ctx.rng);
+            round = buildRound(cards);
             selected = { left: null, right: null };
             matchedCount = 0;
             busy = false;
@@ -80,7 +80,7 @@ export default {
             leftButton.classList.remove('is-selected');
             rightButton.classList.remove('is-selected');
 
-            if (isMatch(left, right)) {
+            if (left.entryId === right.entryId) {
                 ctx.answer(card, true);
                 for (const button of [leftButton, rightButton]) {
                     button.classList.add('is-matched');
@@ -127,7 +127,7 @@ export default {
         }
 
         function render() {
-            clear(view);
+            view.replaceChildren();
             buttons.clear();
             status = h('p', { class: 'visually-hidden', attrs: { role: 'status', 'aria-live': 'polite' } });
             view.append(

@@ -31,11 +31,3 @@ export function buildRound(cards, rng = Math.random) {
         ),
     };
 }
-
-/**
- * @param {MatchItem} left
- * @param {MatchItem} right
- */
-export function isMatch(left, right) {
-    return left.entryId === right.entryId;
-}
