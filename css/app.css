@@ -294,6 +294,59 @@ button:disabled {
 
 /* ---- Start screen ------------------------------------------------------ */
 
+/* The heading of a stored list is a toggle: only its title keeps the small uppercase style. */
+.list-toggle-heading {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+    color: inherit;
+}
+
+.list-toggle {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    text-align: left;
+}
+
+.list-heading {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.list-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.list-toggle .chevron {
+    flex: none;
+    color: var(--muted);
+    transition: transform 0.2s;
+}
+
+.list-toggle[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+}
+
+.list-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
 .list-status {
     display: flex;
     flex-direction: column;
@@ -496,6 +549,38 @@ button:disabled {
     .keys-hint {
         display: block;
     }
+}
+
+/* ---- Previous card ----------------------------------------------------- */
+
+/* Keeps its height while "Back" is hidden, so the card below does not jump when it appears. */
+.review-bar {
+    min-height: 44px;
+    margin-bottom: -6px;
+    display: flex;
+}
+
+/* The negative margin lines the arrow up with the card's edge and keeps the full touch target. */
+.btn-back {
+    min-height: 44px;
+    margin-left: -12px;
+    padding: 8px 12px;
+    border-color: transparent;
+    color: var(--accent);
+}
+
+/* A frame around "Back" would stick out past the card's edge, so hover only underlines the text. */
+@media (hover: hover) {
+    .btn-back:hover:not(:disabled) {
+        border-color: transparent;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+}
+
+/* The mark of a wrong choice does not shake again when the question is reviewed. */
+.is-review .option.is-wrong {
+    animation: none;
 }
 
 /* ---- Flashcards -------------------------------------------------------- */

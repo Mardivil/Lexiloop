@@ -24,6 +24,7 @@ const state = {
     busy: false,
     message: null,
     linkOpen: false,
+    listOpen: false,
 };
 
 let screen = 'start';
@@ -99,12 +100,15 @@ async function importWorkbook(read, fileName, sourceUrl) {
         }
         state.deck = deck;
         state.message = { kind, lines };
+        state.listOpen = false;
     } catch (error) {
         const lines = [t(`import.error.${error instanceof ImportError ? error.code : 'read'}`)];
         if (state.deck) {
             lines.push(t('import.kept'));
         }
         state.message = { kind: 'error', lines };
+        // The loading controls stay at hand for another try.
+        state.listOpen = true;
     } finally {
         state.busy = false;
         if (screen === 'start') {

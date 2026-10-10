@@ -69,15 +69,19 @@ export default {
     'session.score': 'Правильно: {correct}, помилок: {wrong}',
     'speak': 'Озвучити',
 
+    'review.back': 'Назад',
+    'review.continue': 'Продовжити',
+    'review.keys': '→ або Пробіл — продовжити · Esc — завершити',
+
     'flash.tapToFlip': 'Торкніться картки, щоб побачити відповідь',
     'flash.know': 'Знаю',
     'flash.dontKnow': 'Не знаю',
-    'flash.keys': 'Пробіл — перевернути · 1 — знаю · 2 — не знаю · Esc — завершити',
+    'flash.keys': 'Пробіл — перевернути · 1 — знаю · 2 — не знаю · ← — назад · Esc — завершити',
 
     'choice.next': 'Далі',
     'choice.correct': 'Правильно',
     'choice.wrong': 'Неправильно. Правильна відповідь: {answer}',
-    'choice.keys': '1–{count} — варіант · Пробіл — далі · Esc — завершити',
+    'choice.keys': '1–{count} — варіант · Пробіл — далі · ← — назад · Esc — завершити',
 
     'matching.prompts': 'Питання',
     'matching.answers': 'Відповіді',

@@ -17,6 +17,58 @@ function formatDate(iso) {
 }
 
 /**
+ * Heading of a stored word list that folds its loading controls away. Without a list there is
+ * nothing to fold: the controls are the only way forward, so the screen shows them unfolded.
+ *
+ * @param {import('../../data/deck.js').Deck} deck
+ * @param {boolean} open
+ * @param {HTMLElement} controls
+ * @param {(patch: Partial<StartState>) => void} onChange
+ */
+function listToggle(deck, open, controls, onChange) {
+    const button = h(
+        'button',
+        {
+            class: 'list-toggle',
+            type: 'button',
+            attrs: { 'aria-expanded': String(open), 'aria-controls': controls.id },
+            on: {
+                click: () => {
+                    const isOpen = controls.hidden;
+                    controls.hidden = !isOpen;
+                    button.setAttribute('aria-expanded', String(isOpen));
+                    onChange({ listOpen: isOpen });
+                },
+            },
+        },
+        h(
+            'span',
+            { class: 'list-heading' },
+            h('span', { class: 'list-title', text: t('start.list.title') }),
+            h(
+                'span',
+                { class: 'list-status' },
+                h('strong', { text: t('start.list.saved', { words: t('words', { count: deck.entries.length }) }) }),
+                h('span', {
+                    class: 'file-name',
+                    text: deck.sourceUrl
+                        ? t('start.list.sheet', { date: formatDate(deck.importedAt) })
+                        : t('start.list.file', { name: deck.fileName, date: formatDate(deck.importedAt) }),
+                }),
+            ),
+        ),
+    );
+    button.insertAdjacentHTML('beforeend', CHEVRON_ICON);
+    controls.hidden = !open;
+    return h('h2', { class: 'list-toggle-heading' }, button);
+}
+
+const CHEVRON_ICON =
+    '<svg class="chevron" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" ' +
+    'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M6 9l6 6 6-6"/></svg>';
+
+/**
  * @typedef {object} StartState
  * @property {import('../../data/deck.js').Deck | null} deck
  * @property {string} direction
@@ -24,6 +76,7 @@ function formatDate(iso) {
  * @property {boolean} busy        A file is being read.
  * @property {{ kind: 'ok' | 'error' | 'warning', lines: string[] } | null} message
  * @property {boolean} linkOpen    The form for a Google Sheets link is shown.
+ * @property {boolean} listOpen    The loading controls of a stored word list are shown.
  * @property {string} [linkDraft]  Text typed into that form and not loaded yet.
  */
 
@@ -157,27 +210,21 @@ export function showStart(root, { state, onFile, onLink, onRefresh, onChange, on
               state.message.lines.map((line) => h('p', { text: line })),
           );
 
-    const listCard = h(
-        'section',
-        { class: 'card' },
-        h('h2', { text: t('start.list.title') }),
-        deck
-            ? h(
-                  'p',
-                  { class: 'list-status' },
-                  h('strong', { text: t('start.list.saved', { words: t('words', { count: deck.entries.length }) }) }),
-                  h('span', {
-                      class: 'file-name',
-                      text: deck.sourceUrl
-                          ? t('start.list.sheet', { date: formatDate(deck.importedAt) })
-                          : t('start.list.file', { name: deck.fileName, date: formatDate(deck.importedAt) }),
-                  }),
-              )
-            : h('p', { class: 'list-status', text: t('start.list.empty') }),
-        message,
+    const listControls = h(
+        'div',
+        { class: 'list-controls', id: 'list-controls' },
         refreshButton && h('div', { class: 'actions' }, refreshButton),
         h('div', { class: 'actions wrap' }, loadButton, linkButton),
         linkForm,
+    );
+
+    const listCard = h(
+        'section',
+        { class: 'card' },
+        deck ? listToggle(deck, state.listOpen, listControls, onChange) : h('h2', { text: t('start.list.title') }),
+        deck ? null : h('p', { class: 'list-status', text: t('start.list.empty') }),
+        message,
+        listControls,
         fileInput,
     );
 

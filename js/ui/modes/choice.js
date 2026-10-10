@@ -1,7 +1,7 @@
 import { buildOptions } from '../../core/choices.js';
 import { t } from '../../i18n/index.js';
-import { bindKeys } from '../../platform/keys.js';
 import { h, lengthClass, speakButton } from '../dom.js';
+import { createReview } from '../review.js';
 
 /** Delay before the next question after a right answer, long enough to see the confirmation. */
 const CORRECT_ADVANCE_MS = 600;
@@ -25,6 +25,7 @@ export default {
         let card = null;
         let options = [];
         let answered = false;
+        let chosen = -1;
         let waitingForNext = false;
         let revealedAt = 0;
         let advanceTimer = 0;
@@ -34,12 +35,34 @@ export default {
 
         const view = h('div', { class: 'choice' });
         root.append(view);
+        const review = createReview({
+            root,
+            view,
+            keys: {
+                Digit1: () => choose(0),
+                Digit2: () => choose(1),
+                Digit3: () => choose(2),
+                Digit4: () => choose(3),
+                Space: () => waitingForNext && next(),
+                Enter: () => waitingForNext && next(),
+                Escape: ctx.finish,
+            },
+        });
 
         function next() {
             window.clearTimeout(advanceTimer);
+            advanceTimer = 0;
+            if (answered) {
+                const question = { card, options, chosen };
+                // During the pause after a right answer "Back" would skip the card still on screen.
+                review.setPrevious((continueButton) =>
+                    advanceTimer ? null : previousView(question, continueButton),
+                );
+            }
             card = ctx.session.next();
             options = buildOptions(card, ctx.pool);
             answered = false;
+            chosen = -1;
             waitingForNext = false;
             render();
         }
@@ -55,6 +78,7 @@ export default {
                 return;
             }
             answered = true;
+            chosen = index;
             const isCorrect = options[index].correct;
             ctx.answer(card, isCorrect);
 
@@ -87,6 +111,64 @@ export default {
             nextButton.focus({ preventScroll: true });
         }
 
+        function optionContent(option, i, lang) {
+            return [
+                h('span', { class: 'option-key', attrs: { 'aria-hidden': 'true' }, text: String(i + 1) }),
+                h('span', { class: 'option-text', lang, text: option.text }),
+            ];
+        }
+
+        function promptBox(shown) {
+            return h(
+                'div',
+                { class: 'prompt' },
+                h('span', {
+                    class: `prompt-text ${lengthClass(shown.prompt)}`,
+                    lang: shown.promptLang,
+                    text: shown.prompt,
+                }),
+                speakButton(ctx, shown.prompt, shown.promptLang),
+            );
+        }
+
+        /** The answered question with the right option and a wrong choice marked. */
+        function previousView(question, continueButton) {
+            const marks = question.options.map((option, i) => {
+                if (option.correct) {
+                    return ' is-correct';
+                }
+                return i === question.chosen ? ' is-wrong' : '';
+            });
+            return h(
+                'div',
+                { class: 'choice is-review' },
+                review.emptyBar(),
+                promptBox(question.card),
+                h(
+                    'div',
+                    { class: 'options' },
+                    question.options.map((option, i) =>
+                        h(
+                            'div',
+                            { class: `option${marks[i]}`, attrs: { 'aria-disabled': 'true' } },
+                            optionContent(option, i, question.card.answerLang),
+                        ),
+                    ),
+                ),
+                h(
+                    'div',
+                    { class: 'choice-footer' },
+                    h(
+                        'div',
+                        { class: 'actions' },
+                        continueButton,
+                        speakButton(ctx, question.card.answer, question.card.answerLang),
+                    ),
+                ),
+                review.keysHint(),
+            );
+        }
+
         function render() {
             view.replaceChildren();
             optionButtons = options.map((option, i) =>
@@ -97,23 +179,14 @@ export default {
                         type: 'button',
                         on: { click: () => choose(i) },
                     },
-                    h('span', { class: 'option-key', attrs: { 'aria-hidden': 'true' }, text: String(i + 1) }),
-                    h('span', { class: 'option-text', lang: card.answerLang, text: option.text }),
+                    optionContent(option, i, card.answerLang),
                 ),
             );
             footer = h('div', { class: 'choice-footer' });
             status = h('p', { class: 'visually-hidden', attrs: { role: 'status', 'aria-live': 'polite' } });
             view.append(
-                h(
-                    'div',
-                    { class: 'prompt' },
-                    h('span', {
-                        class: `prompt-text ${lengthClass(card.prompt)}`,
-                        lang: card.promptLang,
-                        text: card.prompt,
-                    }),
-                    speakButton(ctx, card.prompt, card.promptLang),
-                ),
+                review.bar,
+                promptBox(card),
                 h('div', { class: 'options' }, optionButtons),
                 footer,
                 status,
@@ -121,21 +194,12 @@ export default {
             );
         }
 
-        bindKeys({
-            Digit1: () => choose(0),
-            Digit2: () => choose(1),
-            Digit3: () => choose(2),
-            Digit4: () => choose(3),
-            Space: () => waitingForNext && next(),
-            Enter: () => waitingForNext && next(),
-            Escape: ctx.finish,
-        });
-
         next();
 
         return {
             unmount() {
                 window.clearTimeout(advanceTimer);
+                review.unmount();
                 view.remove();
             },
         };

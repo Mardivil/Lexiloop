@@ -33,6 +33,7 @@ self.PRECACHE_URLS = [
     'js/ui/modes/flashcards.js',
     'js/ui/modes/matching.js',
     'js/ui/modes/registry.js',
+    'js/ui/review.js',
     'js/ui/screens/session.js',
     'js/ui/screens/start.js',
     'js/ui/screens/stats.js',
